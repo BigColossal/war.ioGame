@@ -1,9 +1,9 @@
 "use strict";
-import { BaseLayer } from "./baseLayer";
+import { BaseLayer } from "./baseLayer.js";
 
 export class UILayer extends BaseLayer {
-  constructor(parentCtx) {
-    super(parentCtx);
-    this.resize();
+  update() {
+    let changed = false;
+    return changed;
   }
 }

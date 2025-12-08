@@ -2,7 +2,7 @@
 import { setupGame } from "./setup.js";
 
 // Get canvas and context
-GameScreen = setupGame();
+const GameScreen = setupGame();
 
 function update() {
   // game logic
@@ -10,7 +10,7 @@ function update() {
 
 function gameLoop() {
   update();
-  draw();
+  GameScreen.renderFrame();
   requestAnimationFrame(gameLoop);
 }
 
