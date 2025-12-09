@@ -9,3 +9,10 @@ export const MapSchema = {
 
   BorderPadding: 5,
 };
+
+export const MovementKeys = {
+  upKeys: ["w", "ArrowUp"],
+  downKeys: ["s", "ArrowDown"],
+  leftKeys: ["a", "ArrowLeft"],
+  rightKeys: ["d", "ArrowRight"],
+};

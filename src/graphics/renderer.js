@@ -39,7 +39,7 @@ export const GameRenderer = {
     for (const layer of this.layers) {
       if (layer.update()) {
         this.dirty = true;
-      } // your custom per-layer logic
+      }
     }
 
     // 2. Composite layers onto main canvas (order matters)

@@ -1,11 +1,12 @@
 "use strict";
 import { setupGame } from "./setup.js";
+import { Camera } from "./camera.js";
 
 // Get canvas and context
 const GameScreen = setupGame();
 
 function update() {
-  // game logic
+  Camera.checkForMovement();
 }
 
 function gameLoop() {
