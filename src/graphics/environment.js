@@ -33,7 +33,7 @@ export class EnvironmentLayer extends BaseLayer {
     );
 
     // ----- GRID LINES -----
-    ctx.strokeStyle = "rgba(0,0,0,0.2)"; // faint lines
+    ctx.strokeStyle = "rgba(0,0,0,0.075)"; // faint lines
     ctx.lineWidth = 1;
 
     ctx.beginPath();

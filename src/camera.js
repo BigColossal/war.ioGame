@@ -7,7 +7,7 @@ export const Camera = {
   x: 0,
   y: 0,
 
-  speed: 10,
+  speed: 5,
   cameraBoundariesX: { left: 0, right: 0 },
   cameraBoundariesY: { top: 0, bottom: 0 },
 
@@ -57,6 +57,12 @@ export const Camera = {
 
   moveCamera(x, y) {
     // x camera movement
+    const length = Math.hypot(x, y);
+    if (length > 0) {
+      x = (x / length) * this.speed;
+      y = (y / length) * this.speed;
+    }
+
     this.x = Math.max(
       this.cameraBoundariesX.left,
       Math.min(this.cameraBoundariesX.right, this.x + x)

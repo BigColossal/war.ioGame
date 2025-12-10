@@ -6,7 +6,7 @@ export const MapSchema = {
     BaseHeightInTiles: 60,
     BorderPaddingInTiles: 6,
     FogPaddingInTiles: 4,
-    TileSizePx: 30,
+    TileSizePx: 50,
 
     get BaseWidthPx() {
       return this.BaseWidthInTiles * this.TileSizePx;
