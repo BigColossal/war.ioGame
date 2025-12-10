@@ -1,9 +1,9 @@
 "use strict";
 import { setupGame } from "./setup.js";
+import { GameRenderer } from "./graphics/renderer.js";
 import { Camera } from "./camera.js";
 
-// Get canvas and context
-const GameScreen = setupGame();
+setupGame();
 
 function update() {
   Camera.checkForMovement();
@@ -11,7 +11,7 @@ function update() {
 
 function gameLoop() {
   update();
-  GameScreen.renderFrame();
+  GameRenderer.renderFrame();
   requestAnimationFrame(gameLoop);
 }
 

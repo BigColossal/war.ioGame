@@ -21,7 +21,7 @@ export const GameRenderer = {
     this.UILayer = new UILayer(this.ctx);
 
     this.layers = [this.EnvironmentLayer, this.EntitiesLayer, this.UILayer]; // layers are in render order
-    setupCanvasResizing([...this.layers, this]);
+    setupCanvasResizing(this);
   },
 
   // Clear the canvas before each frame

@@ -7,6 +7,4 @@ export function setupGame() {
   GameRenderer.init();
   Camera.init();
   setupInputListeners();
-
-  return GameRenderer;
 }

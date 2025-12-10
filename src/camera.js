@@ -3,28 +3,56 @@ import { MapSchema, MovementKeys } from "./gameConfig.js";
 import { keys } from "./input.js";
 
 export const Camera = {
+  // top left corner coords of camera
   x: 0,
   y: 0,
-  speed: 5,
+
+  speed: 10,
+  cameraBoundariesX: { left: 0, right: 0 },
+  cameraBoundariesY: { top: 0, bottom: 0 },
 
   init() {
-    const mapWidth = MapSchema.Dimensions.BaseWidthInTiles;
-    const mapHeight = MapSchema.Dimensions.BaseHeightInTiles;
-    const tileSizePx = MapSchema.Dimensions.TileSizePx;
+    this.updateBoundaries();
 
-    const mapWidthPx = mapWidth * tileSizePx;
-    const mapHeightPx = mapHeight * tileSizePx;
+    const mapWidthPx = MapSchema.Dimensions.MapWidthPx;
+    const mapHeightPx = MapSchema.Dimensions.MapHeightPx;
+
+    this.x = mapWidthPx / 2 - window.innerWidth / 2;
+    this.y = mapHeightPx / 2 - window.innerHeight / 2;
+    this.moved = true;
+    this.setupCameraResize();
+  },
+
+  setupCameraResize() {
+    window.addEventListener("resize", () => {
+      this.updateBoundaries();
+
+      this.x = Math.max(
+        this.cameraBoundariesX.left,
+        Math.min(this.cameraBoundariesX.right, this.x)
+      );
+      this.y = Math.max(
+        this.cameraBoundariesY.top,
+        Math.min(this.cameraBoundariesY.bottom, this.y)
+      );
+
+      this.moved = true;
+    });
+  },
+
+  updateBoundaries() {
+    const mapWidthPx = MapSchema.Dimensions.MapWidthPx;
+    const mapHeightPx = MapSchema.Dimensions.MapHeightPx;
+
+    this.cameraBoundariesX = {
+      left: 0,
+      right: Math.max(0, mapWidthPx - window.innerWidth),
+    };
 
     this.cameraBoundariesY = {
-      top: mapHeightPx / 2,
-      bottom: -(mapHeightPx / 2),
+      top: 0,
+      bottom: Math.max(0, mapHeightPx - window.innerHeight),
     };
-    this.cameraBoundariesX = {
-      right: mapWidthPx / 2,
-      left: -(mapWidthPx / 2),
-    };
-
-    this.moved = true;
   },
 
   moveCamera(x, y) {
@@ -35,12 +63,13 @@ export const Camera = {
     );
 
     this.y = Math.max(
-      this.cameraBoundariesY.bottom,
-      Math.min(this.cameraBoundariesY.top, this.y + y)
+      this.cameraBoundariesY.top,
+      Math.min(this.cameraBoundariesY.bottom, this.y + y)
     );
 
     this.moved = true;
   },
+
   checkForMovement() {
     const MovingUp = MovementKeys.upKeys.some((k) => keys[k]);
     const MovingDown = MovementKeys.downKeys.some((k) => keys[k]);
@@ -52,11 +81,11 @@ export const Camera = {
     let keyPressed = false;
 
     if (MovingUp) {
-      yMovement += this.speed;
+      yMovement -= this.speed;
       keyPressed = true;
     }
     if (MovingDown) {
-      yMovement -= this.speed;
+      yMovement += this.speed;
       keyPressed = true;
     }
 
@@ -72,5 +101,9 @@ export const Camera = {
     if (keyPressed) {
       this.moveCamera(xMovement, yMovement);
     }
+  },
+
+  resetMovedState() {
+    this.moved = false;
   },
 };
