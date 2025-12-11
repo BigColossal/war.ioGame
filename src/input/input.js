@@ -142,7 +142,6 @@ function setupFullscreenListener() {
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    console.log(mouseX, mouseY);
 
     const btn = UILayer.fullscreenBtn;
     if (
@@ -152,7 +151,6 @@ function setupFullscreenListener() {
       mouseY <= btn.y + btn.height
     ) {
       toggleFullscreen();
-      UILayer.resizeScreen();
     }
   });
 }
