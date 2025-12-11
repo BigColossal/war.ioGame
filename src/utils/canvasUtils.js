@@ -7,10 +7,10 @@ export function resizeCanvasToWindow(canvas) {
 
 // Helper to attach resize listener
 export function setupCanvasResizing(layer) {
-  resizeCanvasToWindow(layer.canvas);
+  layer.resizeScreen();
 
   window.addEventListener("resize", () => {
-    resizeCanvasToWindow(layer.canvas);
+    layer.resizeScreen();
   });
 }
 

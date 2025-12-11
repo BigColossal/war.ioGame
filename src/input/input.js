@@ -1,6 +1,7 @@
 "use strict";
 import { setupZoomListener } from "./zoom.js";
 import { Camera } from "../camera.js";
+import { GameRenderer } from "../graphics/renderer.js";
 
 export const keys = {};
 export const mouse = { x: 0, y: 0, pressed: false };
@@ -134,6 +135,44 @@ function setupMouseDrag() {
   });
 }
 
+function setupFullscreenListener() {
+  const canvas = GameRenderer.canvas;
+  const UILayer = GameRenderer.UILayer;
+  canvas.addEventListener("click", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    console.log(mouseX, mouseY);
+
+    const btn = UILayer.fullscreenBtn;
+    if (
+      mouseX >= btn.x &&
+      mouseX <= btn.x + btn.width &&
+      mouseY >= btn.y &&
+      mouseY <= btn.y + btn.height
+    ) {
+      toggleFullscreen();
+      UILayer.resizeScreen();
+    }
+  });
+}
+
+function toggleFullscreen() {
+  const docEl = document.documentElement;
+
+  if (!document.fullscreenElement) {
+    if (docEl.requestFullscreen) {
+      docEl.requestFullscreen();
+    } else if (docEl.webkitRequestFullscreen) {
+      docEl.webkitRequestFullscreen();
+    } else if (docEl.msRequestFullscreen) {
+      docEl.msRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+  }
+}
+
 export function setupInputListeners() {
   // Keyboard
   setupKeyboardListeners();
@@ -149,4 +188,7 @@ export function setupInputListeners() {
 
   // Mouse Drag
   setupMouseDrag();
+
+  // Full screen
+  setupFullscreenListener();
 }

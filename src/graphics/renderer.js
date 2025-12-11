@@ -23,6 +23,7 @@ export const GameRenderer = {
 
     this.layers = [this.EnvironmentLayer, this.EntitiesLayer, this.UILayer]; // layers are in render order
     setupCanvasResizing(this);
+    setupCanvasResizing(this.UILayer);
   },
 
   // Clear the canvas before each frame
@@ -30,7 +31,7 @@ export const GameRenderer = {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   },
   // resize canvas to accomodate for screen size changes
-  resize() {
+  resizeScreen() {
     resizeCanvasToWindow(this.canvas);
   },
 
@@ -48,7 +49,6 @@ export const GameRenderer = {
     // 2. Composite layers onto main canvas (order matters)
     if (this.dirty) {
       this.clear();
-      console.log("dirty");
       for (const layer of this.layers) {
         layer.render(); // draw layer.canvas → this.ctx
       }
