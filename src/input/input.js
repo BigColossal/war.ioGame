@@ -63,7 +63,7 @@ function setupTouchListeners() {
       const dy = (dy_screen / Camera.currentZoom) * dragFactor;
 
       // Move camera
-      Camera.moveCamera(-dx, -dy, true);
+      Camera.moveCamera(-dx, -dy);
       Camera.updateBoundaries();
 
       // store velocity for inertia
@@ -117,7 +117,7 @@ function setupMouseDrag() {
     const dy = (dy_screen / Camera.currentZoom) * dragFactor;
 
     // Move camera exactly like touch
-    Camera.moveCamera(-dx, -dy, true);
+    Camera.moveCamera(-dx, -dy);
     Camera.updateBoundaries();
 
     // Track velocity (same units as inertia)

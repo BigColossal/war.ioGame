@@ -20,24 +20,14 @@ export const Camera = {
   wheelSpringDelay: 120, // ms
   isPinching: false,
 
-  mobileMinZoom: 0.25,
-  PCMinZoom: 0.5,
-  mobileMaxZoom: 1.1,
-  PCMaxZoom: 1.1,
-  get elasticPcMinZoom() {
-    return this.PCMinZoom * 0.8;
+  MinZoom: 0.3,
+  MaxZoom: 1.1,
+  get elasticMinZoom() {
+    return this.MinZoom * 0.9;
   },
 
-  get elasticPCMaxZoom() {
-    return this.PCMaxZoom * 1.5;
-  },
-
-  get elasticMobileMinZoom() {
-    return this.mobileMinZoom * 0.8;
-  },
-
-  get elasticMobileMaxZoom() {
-    return this.mobileMaxZoom * 1.5;
+  get elasticMaxZoom() {
+    return this.MaxZoom * 1.2;
   },
 
   isDragging: false,
@@ -54,6 +44,8 @@ export const Camera = {
   lastDragX: 0,
   lastDragY: 0,
 
+  moved: true,
+
   init() {
     this.updateBoundaries();
 
@@ -62,7 +54,6 @@ export const Camera = {
 
     this.x = mapWidthPx / 2 - window.innerWidth / 2;
     this.y = mapHeightPx / 2 - window.innerHeight / 2;
-    this.moved = true;
     this.setupCameraResize();
   },
 
@@ -101,21 +92,14 @@ export const Camera = {
     };
   },
 
-  moveCamera(x, y, mobile = false) {
+  moveCamera(x, y) {
     // x camera movement
-    if (!mobile) {
-      const length = Math.hypot(x, y);
-      if (length > 0) {
-        x = (x / length) * this.speed;
-        y = (y / length) * this.speed;
-      }
-    }
-
     this.x = Math.max(
       this.cameraBoundariesX.left,
       Math.min(this.cameraBoundariesX.right, this.x + x)
     );
 
+    // y camera movement
     this.y = Math.max(
       this.cameraBoundariesY.top,
       Math.min(this.cameraBoundariesY.bottom, this.y + y)
@@ -125,37 +109,6 @@ export const Camera = {
   },
 
   checkForUpdates() {
-    // const MovingUp = MovementKeys.upKeys.some((k) => keys[k]);
-    // const MovingDown = MovementKeys.downKeys.some((k) => keys[k]);
-    // const MovingLeft = MovementKeys.leftKeys.some((k) => keys[k]);
-    // const MovingRight = MovementKeys.rightKeys.some((k) => keys[k]);
-
-    // let xMovement = 0;
-    // let yMovement = 0;
-    // let keyPressed = false;
-
-    // if (MovingUp) {
-    //   yMovement -= this.speed;
-    //   keyPressed = true;
-    // }
-    // if (MovingDown) {
-    //   yMovement += this.speed;
-    //   keyPressed = true;
-    // }
-
-    // if (MovingLeft) {
-    //   xMovement -= this.speed;
-    //   keyPressed = true;
-    // }
-
-    // if (MovingRight) {
-    //   xMovement += this.speed;
-    //   keyPressed = true;
-    // }
-    // if (keyPressed) {
-    //   this.moveCamera(xMovement, yMovement);
-    // }
-
     this.updateZoom();
     this.handleSpring();
     this.updateZoomSpring(0.016);
@@ -179,25 +132,17 @@ export const Camera = {
     const worldAfterY = this.y + mouseY / this.currentZoom;
 
     // adjust so mouse stays over same world point
-    this.moveCamera(
-      worldBeforeX - worldAfterX,
-      worldBeforeY - worldAfterY,
-      true
-    );
+    this.moveCamera(worldBeforeX - worldAfterX, worldBeforeY - worldAfterY);
 
     this.updateBoundaries();
-    this.moved = true;
   },
 
-  updateTargetZoom(factor, mobile) {
+  updateTargetZoom(factor) {
     this.targetZoom *= factor;
 
-    const hardMin = mobile ? this.mobileMinZoom : this.PCMinZoom;
-    const hardMax = mobile ? this.mobileMaxZoom : this.PCMaxZoom;
-
     // elastic range
-    const elasticMin = hardMin * 0.8;
-    const elasticMax = hardMax * 1.2;
+    const elasticMin = this.elasticMinZoom;
+    const elasticMax = this.elasticMaxZoom;
 
     // allow temporarily stretching past real limits
     this.targetZoom = Math.min(
@@ -238,8 +183,7 @@ export const Camera = {
     // Apply movement
     this.moveCamera(
       this.velX * 16, // scale since vel is per ms and ~16ms per frame
-      this.velY * 16,
-      true
+      this.velY * 16
     );
 
     this.updateBoundaries();
@@ -252,8 +196,8 @@ export const Camera = {
 
   handleSpring() {
     if (!this.isDragging && !this.isPinching) {
-      const hardMin = this.PCMinZoom;
-      const hardMax = this.PCMaxZoom;
+      const hardMin = this.MinZoom;
+      const hardMax = this.MaxZoom;
 
       if (performance.now() - this.lastWheelTime > this.wheelSpringDelay) {
         if (this.targetZoom < hardMin) {

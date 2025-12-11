@@ -13,56 +13,61 @@ export class EnvironmentLayer extends BaseLayer {
     this.mapHeightPx = MapSchema.Dimensions.MapHeightPx - this.fogPx * 2;
     this.baseWidthPx = this.mapWidthPx - this.borderPaddingPx * 2;
     this.baseHeightPx = this.mapHeightPx - this.borderPaddingPx * 2;
+
+    this.rendered = false;
   }
 
   update() {
-    let changed = true;
-
     // Outer Map
-    this.ctx.fillStyle = "#3b7b3fff";
-    this.ctx.fillRect(
-      this.fogPx,
-      this.fogPx,
-      this.mapWidthPx,
-      this.mapHeightPx
-    );
+    if (!this.rendered) {
+      this.ctx.fillStyle = "#3b7b3fff";
+      this.ctx.fillRect(
+        this.fogPx,
+        this.fogPx,
+        this.mapWidthPx,
+        this.mapHeightPx
+      );
 
-    // Inner Map
-    this.ctx.fillStyle = "#448347ff";
-    this.ctx.fillRect(
-      this.borderPaddingPx + this.fogPx,
-      this.borderPaddingPx + this.fogPx,
-      this.baseWidthPx,
-      this.baseHeightPx
-    );
+      // Inner Map
+      this.ctx.fillStyle = "#448347ff";
+      this.ctx.fillRect(
+        this.borderPaddingPx + this.fogPx,
+        this.borderPaddingPx + this.fogPx,
+        this.baseWidthPx,
+        this.baseHeightPx
+      );
 
-    // ----- GRID LINES -----
-    this.ctx.strokeStyle = "rgba(0,0,0,0.125)"; // faint lines
-    this.ctx.lineWidth = 1;
+      // ----- GRID LINES -----
+      this.ctx.strokeStyle = "rgba(0,0,0,0.125)"; // faint lines
+      this.ctx.lineWidth = 1;
 
-    this.ctx.beginPath();
+      this.ctx.beginPath();
 
-    // Vertical lines
-    for (
-      let x = this.fogPx;
-      x <= this.fogPx + this.mapWidthPx;
-      x += this.tileSize
-    ) {
-      this.ctx.moveTo(x, this.fogPx);
-      this.ctx.lineTo(x, this.fogPx + this.mapHeightPx);
+      // Vertical lines
+      for (
+        let x = this.fogPx;
+        x <= this.fogPx + this.mapWidthPx;
+        x += this.tileSize
+      ) {
+        this.ctx.moveTo(x, this.fogPx);
+        this.ctx.lineTo(x, this.fogPx + this.mapHeightPx);
+      }
+
+      // Horizontal lines
+      for (
+        let y = this.fogPx;
+        y <= this.fogPx + this.mapHeightPx;
+        y += this.tileSize
+      ) {
+        this.ctx.moveTo(this.fogPx, y);
+        this.ctx.lineTo(this.fogPx + this.mapWidthPx, y);
+      }
+
+      this.ctx.stroke();
+
+      this.rendered = true;
+      return true;
     }
-
-    // Horizontal lines
-    for (
-      let y = this.fogPx;
-      y <= this.fogPx + this.mapHeightPx;
-      y += this.tileSize
-    ) {
-      this.ctx.moveTo(this.fogPx, y);
-      this.ctx.lineTo(this.fogPx + this.mapWidthPx, y);
-    }
-
-    this.ctx.stroke();
-    return changed;
+    return false;
   }
 }

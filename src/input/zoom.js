@@ -68,8 +68,8 @@ function handleMobileZoom() {
     // --- Handle spring-back ---
     if (e.touches.length < 2) {
       Camera.isPinching = false;
-      const hardMin = Camera.mobileMinZoom;
-      const hardMax = Camera.mobileMaxZoom;
+      const hardMin = Camera.MinZoom;
+      const hardMax = Camera.MaxZoom;
 
       if (Camera.targetZoom < hardMin) {
         Camera.targetZoom = hardMin;

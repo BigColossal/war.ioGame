@@ -7,6 +7,7 @@ import {
 import { EntitiesLayer } from "./entities.js";
 import { EnvironmentLayer } from "./environment.js";
 import { UILayer } from "./ui.js";
+import { Camera } from "../camera.js";
 
 export const GameRenderer = {
   // Initialize anything graphics-related
@@ -35,18 +36,23 @@ export const GameRenderer = {
 
   // Master render call — orchestrates everything in order
   renderFrame() {
-    this.clear();
     for (const layer of this.layers) {
       if (layer.update()) {
         this.dirty = true;
       }
     }
+    if (Camera.moved) {
+      this.dirty = true;
+    }
 
     // 2. Composite layers onto main canvas (order matters)
     if (this.dirty) {
+      this.clear();
+      console.log("dirty");
       for (const layer of this.layers) {
         layer.render(); // draw layer.canvas → this.ctx
       }
+      Camera.moved = false;
     }
     this.dirty = false;
   },
