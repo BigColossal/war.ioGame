@@ -4,8 +4,8 @@ export const MapSchema = {
   Dimensions: {
     BaseWidthInTiles: 60,
     BaseHeightInTiles: 60,
-    BorderPaddingInTiles: 6,
-    FogPaddingInTiles: 4,
+    BorderPaddingInTiles: 8,
+    FogPaddingInTiles: 6,
     TileSizePx: 50,
 
     get BaseWidthPx() {

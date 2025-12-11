@@ -5,52 +5,63 @@ import { MapSchema } from "../gameConfig.js";
 export class EnvironmentLayer extends BaseLayer {
   constructor(parentCtx) {
     super(parentCtx);
+    this.fogPx = MapSchema.Dimensions.FogPx;
+    this.borderPaddingPx = MapSchema.Dimensions.BorderPaddingPx;
+    this.tileSize = MapSchema.Dimensions.TileSizePx;
+    this.mapWidthPx = MapSchema.Dimensions.MapWidthPx - this.fogPx * 2;
+    this.mapHeightPx = MapSchema.Dimensions.MapHeightPx - this.fogPx * 2;
+    this.baseWidthPx = this.mapWidthPx - this.borderPaddingPx * 2;
+    this.baseHeightPx = this.mapHeightPx - this.borderPaddingPx * 2;
   }
 
   update() {
     let changed = true;
-    const fogPx = MapSchema.Dimensions.FogPx;
-    const borderPaddingPx = MapSchema.Dimensions.BorderPaddingPx;
-    const tileSize = MapSchema.Dimensions.TileSizePx;
-    const widthPx = MapSchema.Dimensions.MapWidthPx - fogPx * 2;
-    const heightPx = MapSchema.Dimensions.MapHeightPx - fogPx * 2;
-
-    const ctx = this.ctx;
 
     // Outer Map
-    ctx.fillStyle = "#3b7b3fff";
-    ctx.fillRect(fogPx, fogPx, widthPx, heightPx);
+    this.ctx.fillStyle = "#3b7b3fff";
+    this.ctx.fillRect(
+      this.fogPx,
+      this.fogPx,
+      this.mapWidthPx,
+      this.mapHeightPx
+    );
 
     // Inner Map
-    const baseWidthPx = widthPx - borderPaddingPx * 2;
-    const baseHeightPx = heightPx - borderPaddingPx * 2;
-    ctx.fillStyle = "#448347ff";
-    ctx.fillRect(
-      borderPaddingPx + fogPx,
-      borderPaddingPx + fogPx,
-      baseWidthPx,
-      baseHeightPx
+    this.ctx.fillStyle = "#448347ff";
+    this.ctx.fillRect(
+      this.borderPaddingPx + this.fogPx,
+      this.borderPaddingPx + this.fogPx,
+      this.baseWidthPx,
+      this.baseHeightPx
     );
 
     // ----- GRID LINES -----
-    ctx.strokeStyle = "rgba(0,0,0,0.075)"; // faint lines
-    ctx.lineWidth = 1;
+    this.ctx.strokeStyle = "rgba(0,0,0,0.125)"; // faint lines
+    this.ctx.lineWidth = 1;
 
-    ctx.beginPath();
+    this.ctx.beginPath();
 
     // Vertical lines
-    for (let x = fogPx; x <= fogPx + widthPx; x += tileSize) {
-      ctx.moveTo(x, fogPx);
-      ctx.lineTo(x, fogPx + heightPx);
+    for (
+      let x = this.fogPx;
+      x <= this.fogPx + this.mapWidthPx;
+      x += this.tileSize
+    ) {
+      this.ctx.moveTo(x, this.fogPx);
+      this.ctx.lineTo(x, this.fogPx + this.mapHeightPx);
     }
 
     // Horizontal lines
-    for (let y = fogPx; y <= fogPx + heightPx; y += tileSize) {
-      ctx.moveTo(fogPx, y);
-      ctx.lineTo(fogPx + widthPx, y);
+    for (
+      let y = this.fogPx;
+      y <= this.fogPx + this.mapHeightPx;
+      y += this.tileSize
+    ) {
+      this.ctx.moveTo(this.fogPx, y);
+      this.ctx.lineTo(this.fogPx + this.mapWidthPx, y);
     }
 
-    ctx.stroke();
+    this.ctx.stroke();
     return changed;
   }
 }

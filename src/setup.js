@@ -1,5 +1,5 @@
 "use strict";
-import { setupInputListeners } from "./input.js";
+import { setupInputListeners } from "./input/input.js";
 import { GameRenderer } from "./graphics/renderer.js";
 import { Camera } from "./camera.js";
 

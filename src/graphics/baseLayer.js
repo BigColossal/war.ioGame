@@ -16,12 +16,17 @@ export class BaseLayer {
 
   // Copy onto parent canvas
   render() {
+    const zoom = Camera.zoom;
+
+    const srcWidth = window.innerWidth / zoom;
+    const srcHeight = window.innerHeight / zoom;
+
     this.parentCtx.drawImage(
       this.canvas,
       Camera.x,
       Camera.y,
-      window.innerWidth,
-      window.innerHeight,
+      srcWidth,
+      srcHeight,
       0,
       0,
       window.innerWidth,

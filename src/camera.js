@@ -1,15 +1,21 @@
 "use strict";
 import { MapSchema, MovementKeys } from "./gameConfig.js";
-import { keys } from "./input.js";
+import { keys } from "./input/input.js";
 
 export const Camera = {
   // top left corner coords of camera
   x: 0,
   y: 0,
 
-  speed: 5,
+  speed: 20,
   cameraBoundariesX: { left: 0, right: 0 },
   cameraBoundariesY: { top: 0, bottom: 0 },
+
+  zoom: 1,
+  mobileMinZoom: 0.25,
+  PCMinZoom: 0.5,
+  mobileMaxZoom: 1.1,
+  PCMaxZoom: 1.1,
 
   init() {
     this.updateBoundaries();
@@ -41,26 +47,31 @@ export const Camera = {
   },
 
   updateBoundaries() {
-    const mapWidthPx = MapSchema.Dimensions.MapWidthPx;
-    const mapHeightPx = MapSchema.Dimensions.MapHeightPx;
+    const w = window.innerWidth / this.zoom;
+    const h = window.innerHeight / this.zoom;
+
+    const mapW = MapSchema.Dimensions.MapWidthPx;
+    const mapH = MapSchema.Dimensions.MapHeightPx;
 
     this.cameraBoundariesX = {
       left: 0,
-      right: Math.max(0, mapWidthPx - window.innerWidth),
+      right: Math.max(0, mapW - w),
     };
 
     this.cameraBoundariesY = {
       top: 0,
-      bottom: Math.max(0, mapHeightPx - window.innerHeight),
+      bottom: Math.max(0, mapH - h),
     };
   },
 
-  moveCamera(x, y) {
+  moveCamera(x, y, mobile = false) {
     // x camera movement
-    const length = Math.hypot(x, y);
-    if (length > 0) {
-      x = (x / length) * this.speed;
-      y = (y / length) * this.speed;
+    if (!mobile) {
+      const length = Math.hypot(x, y);
+      if (length > 0) {
+        x = (x / length) * this.speed;
+        y = (y / length) * this.speed;
+      }
     }
 
     this.x = Math.max(
@@ -111,5 +122,32 @@ export const Camera = {
 
   resetMovedState() {
     this.moved = false;
+  },
+  zoomFunctionality(factor, mouseX, mouseY, mobile = false) {
+    // Convert mouse from screen coords → world coords
+    const worldBeforeX = this.x + mouseX / this.zoom;
+    const worldBeforeY = this.y + mouseY / this.zoom;
+
+    // Apply zoom
+    const newZoom = this.zoom * factor;
+    let maxZoom = 0;
+    let minZoom = 0;
+    if (!mobile) {
+      maxZoom = this.PCMaxZoom;
+      minZoom = this.PCMinZoom;
+    } else {
+      maxZoom = this.mobileMaxZoom;
+      minZoom = this.mobileMinZoom;
+    }
+    this.zoom = Math.min(maxZoom, Math.max(minZoom, newZoom));
+
+    // Convert back and adjust camera so world point stays the same
+    const worldAfterX = this.x + mouseX / this.zoom;
+    const worldAfterY = this.y + mouseY / this.zoom;
+
+    this.moveCamera(worldBeforeX - worldAfterX, worldBeforeY - worldAfterY);
+
+    this.updateBoundaries();
+    this.moved = true;
   },
 };
