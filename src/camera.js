@@ -130,24 +130,22 @@ export const Camera = {
 
     // Apply zoom
     const newZoom = this.zoom * factor;
-    let maxZoom = 0;
-    let minZoom = 0;
-    if (!mobile) {
-      maxZoom = this.PCMaxZoom;
-      minZoom = this.PCMinZoom;
-    } else {
-      maxZoom = this.mobileMaxZoom;
-      minZoom = this.mobileMinZoom;
-    }
+    const maxZoom = mobile ? this.mobileMaxZoom : this.PCMaxZoom;
+    const minZoom = mobile ? this.mobileMinZoom : this.PCMinZoom;
     this.zoom = Math.min(maxZoom, Math.max(minZoom, newZoom));
 
     // Convert back and adjust camera so world point stays the same
     const worldAfterX = this.x + mouseX / this.zoom;
     const worldAfterY = this.y + mouseY / this.zoom;
+    console.log("deltaX:", worldBeforeX - worldAfterX);
 
-    this.moveCamera(worldBeforeX - worldAfterX, worldBeforeY - worldAfterY);
-
+    this.moveCamera(
+      worldBeforeX - worldAfterX,
+      worldBeforeY - worldAfterY,
+      true
+    );
     this.updateBoundaries();
+
     this.moved = true;
   },
 };

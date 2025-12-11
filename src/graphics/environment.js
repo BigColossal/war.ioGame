@@ -1,6 +1,7 @@
 "use strict";
 import { BaseLayer } from "./baseLayer.js";
 import { MapSchema } from "../gameConfig.js";
+import { Camera } from "../camera.js";
 
 export class EnvironmentLayer extends BaseLayer {
   constructor(parentCtx) {
