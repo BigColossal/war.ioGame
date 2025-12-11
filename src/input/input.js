@@ -26,43 +26,51 @@ function setupTouchListeners() {
   let lastX = 0;
   let lastY = 0;
 
-  window.addEventListener(
-    "touchstart",
-    (e) => {
-      if (e.touches.length === 1) {
-        // Start drag
-        const t = e.touches[0];
-        lastX = t.clientX;
-        lastY = t.clientY;
-        isDragging = true;
-      } else {
-        // multiple touches → maybe pinch zoom, stop dragging
-        isDragging = false;
-      }
-    },
-    { passive: false }
-  );
+  window.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
 
-  window.addEventListener(
-    "touchmove",
-    (e) => {
-      if (e.touches.length === 1 && isDragging) {
-        e.preventDefault();
+      lastX = t.clientX;
+      lastY = t.clientY;
+      isDragging = true;
 
-        const t = e.touches[0];
-        const dx = t.clientX - lastX;
-        const dy = t.clientY - lastY;
-        // Move camera *opposite* of drag direction (drag = pull map)
-        Camera.moveCamera(-(dx / Camera.zoom), -(dy / Camera.zoom), true);
+      Camera.velX = 0;
+      Camera.velY = 0;
+      Camera.lastDragTime = performance.now();
+    } else {
+      isDragging = false;
+    }
+  });
 
-        Camera.updateBoundaries();
+  window.addEventListener("touchmove", (e) => {
+    if (e.touches.length === 1 && isDragging) {
+      e.preventDefault();
 
-        lastX = t.clientX;
-        lastY = t.clientY;
-      }
-    },
-    { passive: false }
-  );
+      const t = e.touches[0];
+
+      const now = performance.now();
+      const dt = now - Camera.lastDragTime || 16;
+      Camera.lastDragTime = now;
+
+      const dx_screen = t.clientX - lastX;
+      const dy_screen = t.clientY - lastY;
+
+      lastX = t.clientX;
+      lastY = t.clientY;
+
+      const dragFactor = 0.5; // 0.5 = half speed, adjust to taste
+      const dx = (dx_screen / Camera.currentZoom) * dragFactor;
+      const dy = (dy_screen / Camera.currentZoom) * dragFactor;
+
+      // Move camera
+      Camera.moveCamera(-dx, -dy, true);
+      Camera.updateBoundaries();
+
+      // store velocity for inertia
+      Camera.velX = -dx / dt;
+      Camera.velY = -dy / dt;
+    }
+  });
 
   window.addEventListener(
     "touchend",
@@ -73,6 +81,57 @@ function setupTouchListeners() {
     },
     { passive: false }
   );
+}
+
+function setupMouseDrag() {
+  window.addEventListener("mousedown", (e) => {
+    if (e.button === 0 || e.button === 1) {
+      Camera.isDragging = true;
+
+      Camera.lastDragX = e.clientX;
+      Camera.lastDragY = e.clientY;
+      Camera.lastDragTime = performance.now();
+
+      Camera.velX = 0;
+      Camera.velY = 0;
+
+      e.preventDefault();
+    }
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    if (!Camera.isDragging) return;
+
+    const now = performance.now();
+    const dt = now - Camera.lastDragTime || 16;
+    Camera.lastDragTime = now;
+
+    const dx_screen = e.clientX - Camera.lastDragX;
+    const dy_screen = e.clientY - Camera.lastDragY;
+
+    Camera.lastDragX = e.clientX;
+    Camera.lastDragY = e.clientY;
+
+    const dragFactor = 0.75; // 0.5 = half speed, adjust to taste
+    const dx = (dx_screen / Camera.currentZoom) * dragFactor;
+    const dy = (dy_screen / Camera.currentZoom) * dragFactor;
+
+    // Move camera exactly like touch
+    Camera.moveCamera(-dx, -dy, true);
+    Camera.updateBoundaries();
+
+    // Track velocity (same units as inertia)
+    Camera.velX = -dx / dt;
+    Camera.velY = -dy / dt;
+  });
+
+  window.addEventListener("mouseup", () => {
+    Camera.isDragging = false;
+  });
+
+  window.addEventListener("mouseleave", () => {
+    Camera.isDragging = false;
+  });
 }
 
 export function setupInputListeners() {
@@ -87,4 +146,7 @@ export function setupInputListeners() {
 
   // Zoom
   setupZoomListener();
+
+  // Mouse Drag
+  setupMouseDrag();
 }

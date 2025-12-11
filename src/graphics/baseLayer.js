@@ -16,7 +16,7 @@ export class BaseLayer {
 
   // Copy onto parent canvas
   render() {
-    const zoom = Camera.zoom;
+    const zoom = Camera.currentZoom;
 
     const srcWidth = window.innerWidth / zoom;
     const srcHeight = window.innerHeight / zoom;

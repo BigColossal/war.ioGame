@@ -5,13 +5,16 @@ function handleScrollWheel() {
   window.addEventListener(
     "wheel",
     (e) => {
-      // block browser zoom gesture
       if (e.ctrlKey) e.preventDefault();
 
-      // your zoom control
-      const factor = e.deltaY < 0 ? 1.1 : 0.9; // zoom in or out
+      if (Math.abs(e.deltaY) > 0.05) {
+        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        Camera.updateTargetZoom(factor);
+        Camera.lastMouseX = e.clientX;
+        Camera.lastMouseY = e.clientY;
 
-      Camera.zoomFunctionality(factor, e.clientX, e.clientY);
+        Camera.lastWheelTime = performance.now();
+      }
     },
     { passive: false }
   );
@@ -21,8 +24,9 @@ function handleMobileZoom() {
   let lastDistance = null;
 
   function pinchZoom(midX, midY, scaleChange) {
-    Camera.zoomFunctionality(scaleChange, midX, midY, true);
-    Camera.updateBoundaries();
+    Camera.updateTargetZoom(scaleChange);
+    Camera.lastMouseX = midX;
+    Camera.lastMouseY = midY;
   }
 
   window.addEventListener(
@@ -30,6 +34,7 @@ function handleMobileZoom() {
     (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
+        Camera.isPinching = true;
 
         const t1 = e.touches[0];
         const t2 = e.touches[1];
@@ -48,7 +53,7 @@ function handleMobileZoom() {
           const scaleChange = distance / lastDistance;
 
           // Only zoom if scale changed enough (to avoid jitter)
-          if (scaleChange > 1.02 || scaleChange < 0.98) {
+          if (scaleChange > 1.025 || scaleChange < 0.975) {
             pinchZoom(midX, midY, scaleChange);
           }
         }
@@ -59,13 +64,24 @@ function handleMobileZoom() {
     { passive: false }
   );
 
-  window.addEventListener("touchend", () => {
-    lastDistance = null;
-  });
+  window.addEventListener("touchend", (e) => {
+    // --- Handle spring-back ---
+    if (e.touches.length < 2) {
+      Camera.isPinching = false;
+      const hardMin = Camera.mobileMinZoom;
+      const hardMax = Camera.mobileMaxZoom;
 
-  // Reset when pinch ends
-  window.addEventListener("touchend", () => {
-    if (event.touches.length < 2) lastDistance = null;
+      if (Camera.targetZoom < hardMin) {
+        Camera.targetZoom = hardMin;
+        Camera.zoomSpringActive = true;
+      } else if (Camera.targetZoom > hardMax) {
+        Camera.targetZoom = hardMax;
+        Camera.zoomSpringActive = true;
+      }
+
+      // --- Reset pinch distance ---
+      lastDistance = null;
+    }
   });
 
   // ---- Block mobile double-tap zoom ----

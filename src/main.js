@@ -6,7 +6,7 @@ import { Camera } from "./camera.js";
 setupGame();
 
 function update() {
-  Camera.checkForMovement();
+  Camera.checkForUpdates();
 }
 
 function gameLoop() {
