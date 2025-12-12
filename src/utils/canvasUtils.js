@@ -20,3 +20,15 @@ export function getCanvasContext(id = "gameCanvas") {
   const ctx = canvas.getContext("2d");
   return { canvas, ctx };
 }
+
+export function createBlankCanvas(canvas) {
+  const blankCanvas = new OffscreenCanvas(canvas.width, canvas.height);
+  const blankCtx = blankCanvas.getContext("2d");
+
+  window.addEventListener("resize", () => {
+    blankCanvas.width = window.innerWidth;
+    blankCanvas.height = window.innerHeight;
+  });
+
+  return blankCanvas;
+}

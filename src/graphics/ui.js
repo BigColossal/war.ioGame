@@ -11,13 +11,12 @@ import {
 
 export class UILayer extends BaseLayer {
   constructor(parentCtx) {
-    super(parentCtx);
+    super(parentCtx, true);
     this.renderedFPS = FPSHandler.fps;
 
     this.UILoadouts = {
       homeBase: { btns: homeBaseButtons, elements: homeBaseElements },
     };
-
     this.currentUILoadout = "homeBase";
     this.currentUIData = this.loadUI(this.currentUILoadout);
 

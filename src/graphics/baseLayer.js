@@ -1,14 +1,17 @@
-import { resizeCanvasToWindow } from "../utils/canvasUtils.js";
+import { GameRenderer } from "./renderer.js";
 import { Camera } from "../camera.js";
 import { MapSchema } from "../gameConfig.js";
 
 export class BaseLayer {
   constructor(parentCtx, UI = false) {
     this.parentCtx = parentCtx;
-    this.canvas = document.createElement("canvas");
     if (!UI) {
-      this.canvas.width = MapSchema.Dimensions.MapWidthPx;
-      this.canvas.height = MapSchema.Dimensions.MapHeightPx;
+      this.canvas = new OffscreenCanvas(
+        MapSchema.Dimensions.MapWidthPx,
+        MapSchema.Dimensions.MapHeightPx
+      );
+    } else {
+      this.canvas = new OffscreenCanvas(window.innerWidth, window.innerHeight);
     }
     this.ctx = this.canvas.getContext("2d");
   }
@@ -20,8 +23,8 @@ export class BaseLayer {
   render() {
     const zoom = Camera.currentZoom;
 
-    const srcWidth = window.innerWidth / zoom;
-    const srcHeight = window.innerHeight / zoom;
+    const srcWidth = GameRenderer.canvas.width / zoom;
+    const srcHeight = GameRenderer.canvas.height / zoom;
 
     this.parentCtx.drawImage(
       this.canvas,

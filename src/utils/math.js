@@ -1,3 +1,5 @@
+"use strict";
+
 export function intersects(a, b) {
   return (
     a.x < b.x + (b.width || 0) &&

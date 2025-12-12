@@ -3,6 +3,7 @@ import {
   getCanvasContext,
   setupCanvasResizing,
   resizeCanvasToWindow,
+  createBlankCanvas,
 } from "../utils/canvasUtils.js";
 import { EntitiesLayer } from "./entities.js";
 import { EnvironmentLayer } from "./environment.js";
@@ -24,11 +25,15 @@ export const GameRenderer = {
     this.layers = [this.EnvironmentLayer, this.EntitiesLayer, this.UILayer]; // layers are in render order
     setupCanvasResizing(this);
     setupCanvasResizing(this.UILayer);
+
+    this.blankImage = createBlankCanvas(this.canvas);
   },
 
   // Clear the canvas before each frame
   clear() {
-    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.ctx.globalCompositeOperation = "copy";
+    this.ctx.drawImage(this.blankImage, 0, 0);
+    this.ctx.globalCompositeOperation = "source-over";
   },
   // resize canvas to accomodate for screen size changes
   resizeScreen() {
@@ -49,9 +54,11 @@ export const GameRenderer = {
     // 2. Composite layers onto main canvas (order matters)
     if (this.dirty) {
       this.clear();
+
       for (const layer of this.layers) {
         layer.render(); // draw layer.canvas → this.ctx
       }
+
       Camera.moved = false;
     }
     this.dirty = false;
