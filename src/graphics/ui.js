@@ -18,41 +18,48 @@ export class UILayer extends BaseLayer {
       homeBase: { btns: homeBaseButtons, elements: homeBaseElements },
     };
     this.currentUILoadout = "homeBase";
-    this.currentUIData = this.loadUI(this.currentUILoadout);
+
+    this.currentButtons = null;
+    this.currentElements = null;
+    this.allCurrentObjects = null;
+
+    this.loadUI();
 
     this.dirty = false;
   }
-  updateText(buttons, elements) {
+
+  updateText() {
     // Merge both arrays into one flat list
-    const allUIObjects = [
-      ...Object.values(buttons),
-      ...Object.values(elements),
-    ];
-    for (const obj of allUIObjects) {
+    for (const obj of this.allCurrentObjects) {
       if (obj.updateText) obj.updateText();
     }
   }
 
-  loadUI(key) {
-    if (!this.UILoadouts[key]) {
+  loadUI() {
+    if (!this.UILoadouts[this.currentUILoadout]) {
       console.error("[UI LOAD ERROR]:", {
-        missingKey: key,
+        missingKey: this.currentUILoadout,
         available: Object.keys(this.UILoadouts),
       });
-      return null;
+      return;
     }
+    const currentUIData = this.UILoadouts[this.currentUILoadout];
+    this.currentButtons = Object.values(currentUIData.btns);
+    this.currentElements = Object.values(currentUIData.elements);
 
-    return this.UILoadouts[key];
+    // sorts all objects by zIndex
+    this.allCurrentObjects = this.sortAllCurrentObjects();
+  }
+
+  clearArea(x, y, w, h) {
+    const ctx = this.ctx;
+    ctx.clearRect(x, y, w, h);
   }
 
   resizeScreen() {
     resizeCanvasToWindow(this.canvas);
-    const allUIObjects = [
-      ...Object.values(this.currentUIData.btns),
-      ...Object.values(this.currentUIData.elements),
-    ];
 
-    for (const obj of allUIObjects) {
+    for (const obj of this.allCurrentObjects) {
       obj.dirty = true;
       if (obj.dynamicPosition) {
         obj.reposition();
@@ -60,22 +67,24 @@ export class UILayer extends BaseLayer {
     }
   }
 
+  sortAllCurrentObjects() {
+    const buttons = this.currentButtons;
+    const elements = this.currentElements;
+
+    // sorts all objects by z.index
+    return [...buttons, ...elements].sort(
+      (a, b) => (a.zIndex || 0) - (b.zIndex || 0)
+    );
+  }
+
   update() {
-    const buttons = Object.values(this.currentUIData.btns);
-    const elements = Object.values(this.currentUIData.elements);
-
-    const allObjects = [...buttons, ...elements];
-
     // Step 1: update text and mark dirty if needed
-    for (const obj of allObjects) {
+    for (const obj of this.allCurrentObjects) {
       if (obj.updateText) obj.updateText();
     }
 
-    // Step 2: sort by zIndex
-    allObjects.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
-
     // Step 3: track dirty regions
-    const dirtyObjects = allObjects.filter((obj) => obj.dirty);
+    const dirtyObjects = this.allCurrentObjects.filter((obj) => obj.dirty);
 
     if (dirtyObjects.length === 0) return false;
 
@@ -88,7 +97,7 @@ export class UILayer extends BaseLayer {
       };
 
       // Step 4: propagate dirtiness to overlapping higher-zIndex objects
-      for (const obj of allObjects) {
+      for (const obj of this.allCurrentObjects) {
         if (obj.zIndex > dirty.zIndex && intersects(dirtyBox, obj)) {
           obj.dirty = true;
         }
@@ -96,11 +105,13 @@ export class UILayer extends BaseLayer {
     }
 
     // Step 5: redraw all objects in zIndex order
-    for (const obj of allObjects) {
+    for (const obj of this.allCurrentObjects) {
       if (obj.dirty) {
         if (obj.text || obj.bg || obj.sprite) {
           if (obj.width && obj.height) {
-            this.ctx.clearRect(obj.x, obj.y, obj.width, obj.height);
+            if (obj.isButton) {
+            }
+            this.clearArea(obj.x, obj.y, obj.width, obj.height);
           }
         }
 
@@ -122,13 +133,12 @@ export class UILayer extends BaseLayer {
     if (!button.dirty) return false;
 
     const ctx = this.ctx;
-    const x = Math.round(button.x);
-    const y = Math.round(button.y);
-    const w = Math.round(button.width);
-    const h = Math.round(button.height);
+    const x = button.x;
+    const y = button.y;
+    const w = button.width;
+    const h = button.height;
 
     // Optional: clear entire canvas or button area
-    ctx.clearRect(x, y, w, h);
 
     if (button.bg) {
       ctx.fillStyle = button.bgColor || "rgba(0,0,0,0.5)";
@@ -165,12 +175,10 @@ export class UILayer extends BaseLayer {
     if (!element.dirty) return false;
 
     const ctx = this.ctx;
-    const x = Math.round(element.x);
-    const y = Math.round(element.y);
-    const w = Math.round(element.width);
-    const h = Math.round(element.height);
-
-    ctx.clearRect(x, y, w, h);
+    const x = element.x;
+    const y = element.y;
+    const w = element.width;
+    const h = element.height;
 
     // if element has a background
     if (element.bg) {

@@ -1,5 +1,5 @@
 "use strict";
-import { MapSchema, MovementKeys } from "./gameConfig.js";
+import { MapSchema } from "./gameConfig.js";
 
 export const Camera = {
   // top left corner coords of camera
@@ -47,6 +47,7 @@ export const Camera = {
   moved: true,
 
   init() {
+    // initial boundary calc
     this.updateBoundaries();
 
     const mapWidthPx = MapSchema.Dimensions.MapWidthPx;
@@ -59,6 +60,7 @@ export const Camera = {
 
   setupCameraResize() {
     window.addEventListener("resize", () => {
+      // on resize we should always recalc boundaries immediately
       this.updateBoundaries();
 
       this.x = Math.max(
@@ -108,15 +110,20 @@ export const Camera = {
     this.moved = true;
   },
 
-  checkForUpdates() {
-    this.updateZoom();
-    this.handleSpring();
-    this.updateZoomSpring(0.016);
-    this.updateInertia();
-  },
-
   resetMovedState() {
     this.moved = false;
+  },
+
+  checkForUpdates(dt) {
+    // 1. zoom toward target (normal)
+    // 2. spring activation rules (clamp targetZoom)
+    // 3. spring force snapping
+    this.applyZoomTick(dt);
+
+    this.handleSpring();
+
+    // 4. camera inertia movement
+    this.updateInertia(dt);
   },
 
   applySmoothZoom(oldZoom) {
@@ -154,20 +161,38 @@ export const Camera = {
     this.zoomSpringActive = false;
   },
 
-  updateZoom() {
+  applyZoomTick(dt) {
     const oldZoom = this.currentZoom;
 
-    // Lerp toward target
+    // ------------------------------------------
+    // 1. Soft zoom toward target (normal behavior)
+    // ------------------------------------------
     this.currentZoom +=
       (this.targetZoom - this.currentZoom) * this.zoomLerpSpeed;
 
-    // If zoom changed, adjust camera so mouse stays centered
+    // ------------------------------------------
+    // 2. Spring force (overrides and accelerates)
+    // ------------------------------------------
+    if (this.zoomSpringActive) {
+      this.currentZoom +=
+        (this.targetZoom - this.currentZoom) * (this.zoomSpringSpeed * dt);
+
+      // snap to exact target if close enough
+      if (Math.abs(this.currentZoom - this.targetZoom) < 0.001) {
+        this.currentZoom = this.targetZoom;
+        this.zoomSpringActive = false;
+      }
+    }
+
+    // ------------------------------------------
+    // 3. Move camera so zoom centers around mouse
+    // ------------------------------------------
     if (Math.abs(this.currentZoom - oldZoom) > 0.0001) {
       this.applySmoothZoom(oldZoom);
     }
   },
 
-  updateInertia() {
+  updateInertia(dt) {
     if (this.isDragging) return; // don't apply inertia while dragging
 
     // If velocity is tiny → stop
@@ -181,12 +206,7 @@ export const Camera = {
     }
 
     // Apply movement
-    this.moveCamera(
-      this.velX * 16, // scale since vel is per ms and ~16ms per frame
-      this.velY * 16
-    );
-
-    this.updateBoundaries();
+    this.moveCamera(this.velX * (dt * 1000), this.velY * (dt * 1000));
     this.moved = true;
 
     // Apply friction
@@ -209,22 +229,5 @@ export const Camera = {
         }
       }
     }
-  },
-
-  updateZoomSpring(dt) {
-    if (!this.zoomSpringActive) return;
-
-    const oldZoom = this.currentZoom;
-
-    this.currentZoom +=
-      (this.targetZoom - this.currentZoom) * this.zoomSpringSpeed * dt;
-
-    if (Math.abs(this.currentZoom - this.targetZoom) < 0.001) {
-      this.currentZoom = this.targetZoom;
-      this.zoomSpringActive = false;
-    }
-
-    // maintain center-of-zoom properly
-    this.applySmoothZoom(oldZoom);
   },
 };

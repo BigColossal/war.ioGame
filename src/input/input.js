@@ -2,6 +2,7 @@
 import { setupZoomListener } from "./zoom.js";
 import { Camera } from "../camera.js";
 import { GameRenderer } from "../graphics/renderer.js";
+import { FPSHandler } from "../fps.js";
 
 export const keys = {};
 export const mouse = { x: 0, y: 0, pressed: false };
@@ -50,7 +51,6 @@ function setupTouchListeners() {
       const t = e.touches[0];
 
       const now = performance.now();
-      const dt = now - Camera.lastDragTime || 16;
       Camera.lastDragTime = now;
 
       const dx_screen = t.clientX - lastX;
@@ -65,11 +65,10 @@ function setupTouchListeners() {
 
       // Move camera
       Camera.moveCamera(-dx, -dy);
-      Camera.updateBoundaries();
 
       // store velocity for inertia
-      Camera.velX = -dx / dt;
-      Camera.velY = -dy / dt;
+      Camera.velX = -dx / 16;
+      Camera.velY = -dy / 16;
     }
   });
 
@@ -104,7 +103,6 @@ function setupMouseDrag() {
     if (!Camera.isDragging) return;
 
     const now = performance.now();
-    const dt = now - Camera.lastDragTime || 16;
     Camera.lastDragTime = now;
 
     const dx_screen = e.clientX - Camera.lastDragX;
@@ -119,11 +117,10 @@ function setupMouseDrag() {
 
     // Move camera exactly like touch
     Camera.moveCamera(-dx, -dy);
-    Camera.updateBoundaries();
 
     // Track velocity (same units as inertia)
-    Camera.velX = -dx / dt;
-    Camera.velY = -dy / dt;
+    Camera.velX = -dx / 16;
+    Camera.velY = -dy / 16;
   });
 
   window.addEventListener("mouseup", () => {

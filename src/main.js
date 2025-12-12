@@ -7,7 +7,7 @@ import { FPSHandler } from "./fps.js";
 setupGame();
 
 function update() {
-  Camera.checkForUpdates();
+  Camera.checkForUpdates(FPSHandler.dt);
   FPSHandler.update();
 }
 

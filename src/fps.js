@@ -4,12 +4,16 @@ export const FPSHandler = {
   fpsHistory: [],
   lastFrameTime: performance.now(),
   fps: 0,
+  dt: 0, // delta time in seconds
   fpsSampleTime: 1 * 1000, // averaging window in ms
 
   update() {
     const now = performance.now();
-    const delta = now - this.lastFrameTime;
+    const delta = now - this.lastFrameTime; // ms since last frame
     this.lastFrameTime = now;
+
+    // Delta time in seconds
+    this.dt = delta / 1000;
 
     // Instant FPS
     const instantFPS = 1000 / delta;

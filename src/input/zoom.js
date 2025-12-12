@@ -22,6 +22,7 @@ function handleScrollWheel() {
 
 function handleMobileZoom() {
   let lastDistance = null;
+  let lastTap = 0;
 
   function pinchZoom(midX, midY, scaleChange) {
     Camera.updateTargetZoom(scaleChange);
@@ -64,34 +65,31 @@ function handleMobileZoom() {
     { passive: false }
   );
 
-  window.addEventListener("touchend", (e) => {
-    // --- Handle spring-back ---
-    if (e.touches.length < 2) {
-      Camera.isPinching = false;
-      const hardMin = Camera.MinZoom;
-      const hardMax = Camera.MaxZoom;
-
-      if (Camera.targetZoom < hardMin) {
-        Camera.targetZoom = hardMin;
-        Camera.zoomSpringActive = true;
-      } else if (Camera.targetZoom > hardMax) {
-        Camera.targetZoom = hardMax;
-        Camera.zoomSpringActive = true;
-      }
-
-      // --- Reset pinch distance ---
-      lastDistance = null;
-    }
-  });
-
-  // ---- Block mobile double-tap zoom ----
-  let lastTap = 0;
   window.addEventListener(
     "touchend",
     (e) => {
+      // --- Pinch handling ---
+      if (e.touches.length < 2) {
+        Camera.isPinching = false;
+        const hardMin = Camera.MinZoom;
+        const hardMax = Camera.MaxZoom;
+
+        if (Camera.targetZoom < hardMin) {
+          Camera.targetZoom = hardMin;
+          Camera.zoomSpringActive = true;
+        } else if (Camera.targetZoom > hardMax) {
+          Camera.targetZoom = hardMax;
+          Camera.zoomSpringActive = true;
+        }
+
+        // Reset pinch distance
+        lastDistance = null;
+      }
+
+      // --- Block mobile double-tap zoom ---
       const now = Date.now();
       if (now - lastTap < 300) {
-        e.preventDefault();
+        e.preventDefault(); // only prevent if really a double-tap
       }
       lastTap = now;
     },

@@ -5,7 +5,7 @@ export const buttons = {
   fullscreenBtn: {
     // Position & Size
     x: window.innerWidth - 100,
-    y: 0,
+    y: 10,
     width: 80,
     height: 30,
     anchor: "top-left",
@@ -16,7 +16,7 @@ export const buttons = {
     bgColor: "#222",
     hoverColor: "#333",
     pressedColor: "#777",
-    font: "12px Cause",
+    font: "14px Cause",
     textColor: "#fff",
     opacity: 1,
     dynamicPosition: true,

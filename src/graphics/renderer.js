@@ -54,7 +54,6 @@ export const GameRenderer = {
     // 2. Composite layers onto main canvas (order matters)
     if (this.dirty) {
       this.clear();
-
       for (const layer of this.layers) {
         layer.render(); // draw layer.canvas → this.ctx
       }
