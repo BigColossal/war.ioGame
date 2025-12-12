@@ -3,11 +3,13 @@ import { Camera } from "../camera.js";
 import { MapSchema } from "../gameConfig.js";
 
 export class BaseLayer {
-  constructor(parentCtx) {
+  constructor(parentCtx, UI = false) {
     this.parentCtx = parentCtx;
     this.canvas = document.createElement("canvas");
-    this.canvas.width = MapSchema.Dimensions.MapWidthPx;
-    this.canvas.height = MapSchema.Dimensions.MapHeightPx;
+    if (!UI) {
+      this.canvas.width = MapSchema.Dimensions.MapWidthPx;
+      this.canvas.height = MapSchema.Dimensions.MapHeightPx;
+    }
     this.ctx = this.canvas.getContext("2d");
   }
 

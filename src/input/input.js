@@ -143,7 +143,7 @@ function setupFullscreenListener() {
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
-    const btn = UILayer.fullscreenBtn;
+    const btn = UILayer.UILoadouts.homeBase.btns.fullscreenBtn;
     if (
       mouseX >= btn.x &&
       mouseX <= btn.x + btn.width &&
